@@ -11,8 +11,8 @@
 
 int house[10][20] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -180,8 +180,25 @@ void rvc_detect(struct RVC *rvc, struct obstacleData *ob) {
     if(ob->right == 1){
         rvc->is_right_obs = true;
     }
-
-    if(rvc->is_front_obs && !rvc->is_left_obs){
+    if(rvc->is_backing){
+        if (!rvc->is_left_obs) {
+        // 왼쪽으로 회전하고 후진 상태를 종료합니다.
+        turn_left(rvc);
+        printf("turn left at : (%d, %d)\n", rvc->pos_x, rvc->pos_y);
+        rvc->is_backing = false;
+        } 
+        else if (rvc->is_left_obs && !rvc->is_right_obs) {
+        // 오른쪽으로 회전하고 후진 상태를 종료합니다.
+        turn_right(rvc);
+        printf("turn right at : (%d, %d)\n", rvc->pos_x, rvc->pos_y);
+        rvc->is_backing = false;
+        } 
+        else {
+        // 계속 후진합니다.
+        move_backward(rvc, rvc->motor.move_backward);
+        }
+    }
+    else if(rvc->is_front_obs && !rvc->is_left_obs){
         turn_left(rvc);
         printf("turn left at : (%d, %d)\n", rvc->pos_x, rvc->pos_y);
     }
@@ -192,24 +209,8 @@ void rvc_detect(struct RVC *rvc, struct obstacleData *ob) {
     else if(rvc->is_front_obs && rvc->is_left_obs && rvc->is_right_obs){
         rvc->motor.move_backward = true;
         rvc->is_backing = true;
-        move_backward(rvc, rvc->motor.move_backward);
         printf("back start at : (%d, %d)\n", rvc->pos_x, rvc->pos_y);
-    }
-    else if(rvc->is_backing){
-        if (!rvc->is_left_obs) {
-        // 왼쪽으로 회전하고 후진 상태를 종료합니다.
-        turn_left(rvc);
-        rvc->is_backing = false;
-        } 
-        else if (!rvc->is_right_obs) {
-        // 오른쪽으로 회전하고 후진 상태를 종료합니다.
-        turn_right(rvc);
-        rvc->is_backing = false;
-        } 
-        else {
-        // 계속 후진합니다.
         move_backward(rvc, rvc->motor.move_backward);
-        }
     }
     else if(!rvc->is_front_obs){
         rvc->motor.move_forward = true;
@@ -228,6 +229,7 @@ int main(void) {
         rvc.is_front_obs = false;
         rvc.is_left_obs = false;
         rvc.is_right_obs = false;
+        //printf("im here : (%d, %d) direction is %d\n", rvc.pos_x, rvc.pos_y, rvc.direction);
         timeout -= 1;
         //sleep(1); //tick = 1
     }
