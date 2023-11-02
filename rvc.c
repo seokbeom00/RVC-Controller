@@ -13,12 +13,12 @@ int house[10][20] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
 
@@ -84,6 +84,7 @@ void move_forward(struct RVC *rvc, bool enable) {
             rvc->pos_y++;
         }
     }
+    sleep(1);
 }
 
 void move_backward(struct RVC *rvc, bool enable){
@@ -101,6 +102,7 @@ void move_backward(struct RVC *rvc, bool enable){
             rvc->pos_y--;
         }
     }
+    sleep(1);
 }
 
 void turn_left(struct RVC *rvc) {
@@ -217,7 +219,24 @@ void rvc_detect(struct RVC *rvc, struct obstacleData *ob) {
         move_forward(rvc, rvc->motor.move_forward);
     }
 }
-
+void print_house(struct RVC *rvc) {
+    // 화면을 지우기 위한 명령어. 유닉스 계열 시스템에서 동작. 윈도우에서는 "cls"를 사용.
+    system("clear");
+    for(int i=0; i<10; i++) {
+        for(int j=0; j<20; j++) {
+            if(i == rvc->pos_x && j == rvc->pos_y) {
+                printf("O");
+            } else {
+                if(house[i][j] == 1) {
+                    printf("#");
+                } else {
+                    printf(" ");
+                }
+            }
+        }
+        printf("\n");
+    }
+}
 int main(void) {
     struct RVC rvc;
     rvc_init(&rvc);
@@ -230,7 +249,8 @@ int main(void) {
         rvc.is_left_obs = false;
         rvc.is_right_obs = false;
         //printf("im here : (%d, %d) direction is %d\n", rvc.pos_x, rvc.pos_y, rvc.direction);
+        print_house(&rvc);
         timeout -= 1;
-        //sleep(1); //tick = 1
+        sleep(1); //tick = 1
     }
 }
