@@ -12,9 +12,9 @@
 int house[10][20] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -84,7 +84,7 @@ void move_forward(struct RVC *rvc, bool enable) {
             rvc->pos_y++;
         }
     }
-    sleep(1);
+    //sleep(1);
 }
 
 void move_backward(struct RVC *rvc, bool enable){
@@ -102,7 +102,7 @@ void move_backward(struct RVC *rvc, bool enable){
             rvc->pos_y--;
         }
     }
-    sleep(1);
+    //sleep(0.5);
 }
 
 void turn_left(struct RVC *rvc) {
@@ -124,7 +124,7 @@ void turn_left(struct RVC *rvc) {
     else if(rvc->direction == RIGHT){
         rvc->direction = UP;
     }
-    sleep(1); //tick * 5
+    //sleep(0.5); //tick * 5
 }
 
 void turn_right(struct RVC *rvc) {
@@ -146,10 +146,10 @@ void turn_right(struct RVC *rvc) {
     else if(rvc->direction == RIGHT){
         rvc->direction = DOWN;
     }
-    sleep(1); //tick * 5
+    sleep(0.5); //tick * 5
 }
 
-void set_obstacle(int direction, int pos_x, int pos_y, struct obstacleData *ob){
+void get_obstacleData(int direction, int pos_x, int pos_y, struct obstacleData *ob){
     if(direction == UP){
         ob->front = house[pos_x-1][pos_y];
         ob->left = house[pos_x][pos_y-1];
@@ -172,7 +172,8 @@ void set_obstacle(int direction, int pos_x, int pos_y, struct obstacleData *ob){
     }
 }
 
-void rvc_detect(struct RVC *rvc, struct obstacleData *ob) {
+void rvc_controller(struct RVC *rvc, struct obstacleData *ob) {
+    get_obstacleData(rvc->direction, rvc->pos_x, rvc->pos_y, ob);
     if(ob->front == 1){
         rvc->is_front_obs = true;
     }
@@ -220,7 +221,6 @@ void rvc_detect(struct RVC *rvc, struct obstacleData *ob) {
     }
 }
 void print_house(struct RVC *rvc) {
-    // 화면을 지우기 위한 명령어. 유닉스 계열 시스템에서 동작. 윈도우에서는 "cls"를 사용.
     system("clear");
     for(int i=0; i<10; i++) {
         for(int j=0; j<20; j++) {
@@ -243,14 +243,12 @@ int main(void) {
     struct obstacleData ob;
     int timeout = 500;
     while(timeout>0){
-        set_obstacle(rvc.direction, rvc.pos_x, rvc.pos_y, &ob);
-        rvc_detect(&rvc, &ob);
+        rvc_controller(&rvc, &ob);
         rvc.is_front_obs = false;
         rvc.is_left_obs = false;
         rvc.is_right_obs = false;
-        //printf("im here : (%d, %d) direction is %d\n", rvc.pos_x, rvc.pos_y, rvc.direction);
         print_house(&rvc);
         timeout -= 1;
-        sleep(1); //tick = 1
+        //sleep(1); //tick = 1
     }
 }
